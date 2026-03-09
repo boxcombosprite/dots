@@ -21,32 +21,12 @@ IFACE=wg0
 #ADDRESS_FAMILY=inet6?
 color=#00FF00
 interval=10
-# set this to 1 to display the name of the connected WIFI interface instead of the IP address.
 display_wifi_name=0
-
-[bandwidth]
-command=$SCRIPT_DIR/bandwidth2 
-interval=persist
-markup=pango
-LABEL=
-INTERFACE=wlp0s20f3
-USE_BITS=0
-#USE_BYTES=1
-WARN_RX=20000000
-WARN_TX=20000000
-CRIT_RX=30000000
-CRIT_TX=30000000
-#USE_SI=0
 
 [volume]
 command=$SCRIPT_DIR/volume
 interval=once
 signal=11
-
-[battery2]
-command=$SCRIPT_DIR/battery2
-markup=pango
-interval=30
 
 [time]
 command=$SCRIPT_DIR/time
