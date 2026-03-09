@@ -1,0 +1,13 @@
+prompt_witch_setup() {
+    autoload -Uz colors && colors
+    PS1="lolol"
+    #PS2=
+    #RPS1=
+    #RPS2=
+}
+
+prompt_witch_help() {
+    cat <<EOF
+help me
+EOF
+}
