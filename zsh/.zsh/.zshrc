@@ -1,7 +1,3 @@
-export PATH=$HOME/.local/bin:$PATH
-
-ZDOTDIR=$HOME/.zsh
-
 fpath=(
     $ZDOTDIR/prompt
     $fpath
@@ -47,6 +43,10 @@ bindkey -M vicmd v edit-command-line
 
 alias ls='ls --color=auto'
 alias vim='nvim'
+
+# plugins
+source $ZDOTDIR/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+source $ZDOTDIR/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 PROMPT="%B%F{yellow}%n%f%b %F{green}%~%f $ "
 
