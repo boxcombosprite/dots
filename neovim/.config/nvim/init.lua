@@ -11,9 +11,7 @@ vim.o.mouse = 'a'
 
 vim.o.showmode = false
 
-vim.schedule(function()
-  vim.o.clipboard = 'unnamedplus'
-end)
+vim.schedule(function() vim.o.clipboard = 'unnamedplus' end)
 
 vim.o.breakindent = true
 
@@ -66,18 +64,14 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 vim.api.nvim_create_autocmd('TextYankPost', {
   desc = 'Highlight when yanking (copying) text',
   group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
-  callback = function()
-    vim.hl.on_yank()
-  end,
+  callback = function() vim.hl.on_yank() end,
 })
 
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
   local lazyrepo = 'https://github.com/folke/lazy.nvim.git'
   local out = vim.fn.system { 'git', 'clone', '--filter=blob:none', '--branch=stable', lazyrepo, lazypath }
-  if vim.v.shell_error ~= 0 then
-    error('Error cloning lazy.nvim:\n' .. out)
-  end
+  if vim.v.shell_error ~= 0 then error('Error cloning lazy.nvim:\n' .. out) end
 end
 
 ---@type vim.Option
@@ -104,39 +98,7 @@ require('lazy').setup({
     event = 'VimEnter',
     opts = {
       delay = 0,
-      icons = {
-        mappings = vim.g.have_nerd_font,
-        keys = vim.g.have_nerd_font and {} or {
-          Up = '<Up> ',
-          Down = '<Down> ',
-          Left = '<Left> ',
-          Right = '<Right> ',
-          C = '<C-…> ',
-          M = '<M-…> ',
-          D = '<D-…> ',
-          S = '<S-…> ',
-          CR = '<CR> ',
-          Esc = '<Esc> ',
-          ScrollWheelDown = '<ScrollWheelDown> ',
-          ScrollWheelUp = '<ScrollWheelUp> ',
-          NL = '<NL> ',
-          BS = '<BS> ',
-          Space = '<Space> ',
-          Tab = '<Tab> ',
-          F1 = '<F1>',
-          F2 = '<F2>',
-          F3 = '<F3>',
-          F4 = '<F4>',
-          F5 = '<F5>',
-          F6 = '<F6>',
-          F7 = '<F7>',
-          F8 = '<F8>',
-          F9 = '<F9>',
-          F10 = '<F10>',
-          F11 = '<F11>',
-          F12 = '<F12>',
-        },
-      },
+      icons = { mappings = vim.g.have_nerd_font },
 
       spec = {
         { '<leader>s', group = '[S]earch', mode = { 'n', 'v' } },
@@ -156,9 +118,7 @@ require('lazy').setup({
 
         build = 'make',
 
-        cond = function()
-          return vim.fn.executable 'make' == 1
-        end,
+        cond = function() return vim.fn.executable 'make' == 1 end,
       },
       { 'nvim-telescope/telescope-ui-select.nvim' },
 
@@ -204,23 +164,31 @@ require('lazy').setup({
         end,
       })
 
-      vim.keymap.set('n', '<leader>/', function()
-        builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
-          winblend = 10,
-          previewer = false,
-        })
-      end, { desc = '[/] Fuzzily search in current buffer' })
+      vim.keymap.set(
+        'n',
+        '<leader>/',
+        function()
+          builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
+            winblend = 10,
+            previewer = false,
+          })
+        end,
+        { desc = '[/] Fuzzily search in current buffer' }
+      )
 
-      vim.keymap.set('n', '<leader>s/', function()
-        builtin.live_grep {
-          grep_open_files = true,
-          prompt_title = 'Live Grep in Open Files',
-        }
-      end, { desc = '[S]earch [/] in Open Files' })
+      vim.keymap.set(
+        'n',
+        '<leader>s/',
+        function()
+          builtin.live_grep {
+            grep_open_files = true,
+            prompt_title = 'Live Grep in Open Files',
+          }
+        end,
+        { desc = '[S]earch [/] in Open Files' }
+      )
 
-      vim.keymap.set('n', '<leader>sn', function()
-        builtin.find_files { cwd = vim.fn.stdpath 'config' }
-      end, { desc = '[S]earch [N]eovim files' })
+      vim.keymap.set('n', '<leader>sn', function() builtin.find_files { cwd = vim.fn.stdpath 'config' } end, { desc = '[S]earch [N]eovim files' })
     end,
   },
 
@@ -278,9 +246,7 @@ require('lazy').setup({
           end
 
           if client and client:supports_method('textDocument/inlayHint', event.buf) then
-            map('<leader>th', function()
-              vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
-            end, '[T]oggle Inlay [H]ints')
+            map('<leader>th', function() vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf }) end, '[T]oggle Inlay [H]ints')
           end
         end,
       })
@@ -324,9 +290,7 @@ require('lazy').setup({
         on_init = function(client)
           if client.workspace_folders then
             local path = client.workspace_folders[1].name
-            if path ~= vim.fn.stdpath 'config' and (vim.uv.fs_stat(path .. '/.luarc.json') or vim.uv.fs_stat(path .. '/.luarc.jsonc')) then
-              return
-            end
+            if path ~= vim.fn.stdpath 'config' and (vim.uv.fs_stat(path .. '/.luarc.json') or vim.uv.fs_stat(path .. '/.luarc.jsonc')) then return end
           end
 
           client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
@@ -362,9 +326,7 @@ require('lazy').setup({
     keys = {
       {
         '<leader>f',
-        function()
-          require('conform').format { async = true, lsp_format = 'fallback' }
-        end,
+        function() require('conform').format { async = true, lsp_format = 'fallback' } end,
         mode = '',
         desc = '[F]ormat buffer',
       },
@@ -402,9 +364,7 @@ require('lazy').setup({
         version = '2.*',
         build = (function()
           -- Build Step is needed for regex support in snippets.
-          if vim.fn.has 'win32' == 1 or vim.fn.executable 'make' == 0 then
-            return
-          end
+          if vim.fn.has 'win32' == 1 or vim.fn.executable 'make' == 0 then return end
           return 'make install_jsregexp'
         end)(),
         dependencies = {},
@@ -453,9 +413,7 @@ require('lazy').setup({
 
       -- move cursor location in statusline
       ---@diagnostic disable-next-line: duplicate-set-field
-      statusline.section_location = function()
-        return '%2l:%-2v'
-      end
+      statusline.section_location = function() return '%2l:%-2v' end
     end,
   },
   {
@@ -465,9 +423,7 @@ require('lazy').setup({
       require('nvim-treesitter').install(filetypes)
       vim.api.nvim_create_autocmd('FileType', {
         pattern = filetypes,
-        callback = function()
-          vim.treesitter.start()
-        end,
+        callback = function() vim.treesitter.start() end,
       })
     end,
   },
