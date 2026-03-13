@@ -43,7 +43,17 @@ vim.o.confirm = true
 -- keybinds
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
--- diagnostic keymaps
+-- diagnostic keymaps + config
+-- See :help vim.diagnostic.Opts
+vim.diagnostic.config {
+  update_in_insert = false,
+  severity_sort = true,
+  float = { border = 'rounded', source = 'if_many' },
+  underline = { severity = vim.diagnostic.severity.ERROR },
+  virtual_text = true, -- text at end of line
+  virtual_lines = false, -- lines under
+  jump = { float = true }, -- open float when jumping through diags
+}
 vim.keymap.set('n', '<leader>ql', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix [L]ist' })
 vim.keymap.set('n', '<leader>qf', vim.diagnostic.open_float, { desc = 'Open [Q]uickfix [F]loat' })
 
@@ -127,9 +137,7 @@ require('lazy').setup({
     config = function()
       require('telescope').setup {
         extensions = {
-          ['ui-select'] = {
-            require('telescope.themes').get_dropdown(),
-          },
+          ['ui-select'] = { require('telescope.themes').get_dropdown() },
         },
       }
 
@@ -251,18 +259,6 @@ require('lazy').setup({
         end,
       })
 
-      -- Diagnostic Config
-      -- See :help vim.diagnostic.Opts
-      vim.diagnostic.config {
-        update_in_insert = false,
-        severity_sort = true,
-        float = { border = 'rounded', source = 'if_many' },
-        underline = { severity = vim.diagnostic.severity.ERROR },
-        virtual_text = true, -- text at end of line
-        virtual_lines = false, -- lines under
-        jump = { float = true }, -- open float when jumping through diags
-      }
-
       -- broadcast new capabilities to servers
       local capabilities = require('blink.cmp').get_lsp_capabilities()
 
@@ -276,6 +272,7 @@ require('lazy').setup({
       -- mason stuff
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
+        'lua_ls',
         'stylua',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -296,10 +293,7 @@ require('lazy').setup({
           client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
             runtime = {
               version = 'LuaJIT',
-              path = {
-                'lua/?.lua',
-                'lua/?/init.lua',
-              },
+              path = { 'lua/?.lua', 'lua/?/init.lua' },
             },
             workspace = {
               checkThirdParty = false,
