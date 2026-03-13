@@ -43,6 +43,7 @@ bindkey -M vicmd v edit-command-line
 
 alias ls='ls --color=auto'
 alias vim='nvim'
+alias vxxd='vim -b -c ":%!xxd" -c "set nomodified ft=xxd"'
 
 # plugins
 source $ZDOTDIR/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
