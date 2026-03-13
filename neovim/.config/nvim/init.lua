@@ -262,7 +262,7 @@ require('lazy').setup({
       -- broadcast new capabilities to servers
       local capabilities = require('blink.cmp').get_lsp_capabilities()
 
-      --@type table<string, vim.lsp.Config>
+      ---@type table<string, vim.lsp.Config>
       local servers = {
         clangd = {},
         gopls = {},
