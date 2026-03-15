@@ -11,8 +11,6 @@ vim.o.mouse = 'a'
 
 vim.o.showmode = false
 
-vim.schedule(function() vim.o.clipboard = 'unnamedplus' end)
-
 vim.o.breakindent = true
 
 vim.o.undofile = true
@@ -89,6 +87,7 @@ local rtp = vim.opt.rtp
 rtp:prepend(lazypath)
 
 require('lazy').setup({
+  { dir = '~/workbench/dev/chomp.nvim' },
   { 'NMAC427/guess-indent.nvim', opts = {} },
   {
     'lewis6991/gitsigns.nvim',
