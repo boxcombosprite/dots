@@ -58,6 +58,7 @@ local servers = {
   pyright = {},
   rust_analyzer = {},
   ansiblels = {},
+  fsautocomplete = {},
 
   stylua = {},
   lua_ls = {
