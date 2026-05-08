@@ -19,6 +19,7 @@ set $cursor_size 24
 #set $cursor_theme 'theme'
 #set $titlebar_text_size 32
 #set $titlebar_font 'font'
+#set $font_name 'Adwaita Sans 11'
 
 #seat seat0 xcursor_theme $cursor_theme $cursor_size
 
@@ -31,7 +32,11 @@ exec_always {
     #gsettings set $gnome-schema cursor-theme $cursor_theme
     gsettings set $gnome-schema cursor-size $cursor_size
     gsettings set $gnome-schema color-scheme $system_color_scheme
+    #gsettings set $gnome-schema font-name $font_name
 }
+
+### sway theming
+#font pango:HasklugNerdFontMono 10
 
 ### output
 output DP-3 {
