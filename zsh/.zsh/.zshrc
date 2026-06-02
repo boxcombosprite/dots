@@ -3,12 +3,15 @@ fpath=(
     $fpath
 )
 
+export PATH="$PATH:/home/pasta/.dotnet/tools"
 # this doesnt work for some reason??
 #autoload -Uz promptinit
 #promptinit
 #prompt witch
 
 eval $(dircolors)
+
+export GPG_TTY=$(tty)
 
 # The following lines were added by compinstall
 
@@ -44,6 +47,20 @@ bindkey -M vicmd v edit-command-line
 alias ls='ls --color=auto'
 alias vim='nvim'
 alias vxxd='vim -b -c ":%!xxd" -c "set nomodified ft=xxd"'
+
+fkill() {
+    local pid
+    if [ "$UID" != "0" ]; then
+        pid=$(ps -f -u $UID | sed 1d | fzf -m | awk '{print $2}')
+    else
+        pid=$(ps -ef | sed 1d | fzf -m | awk '{print $2}')
+    fi
+
+    if [ "x$pid" != "x" ]
+    then
+        echo $pid | xargs kill -${1:-9}
+    fi
+}
 
 # plugins
 source $ZDOTDIR/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
