@@ -1,6 +1,5 @@
 #!/bin/bash
 # shitty helper script for launching a qemu image
-# (assumes nftables)
 set -euo pipefail
 
 e=[!]
@@ -10,30 +9,46 @@ v=[*]
 show_help() {
   echo \
 "usage:
-  $0 [options] file
+  $0 command [options] file
 
-options:
-  -m, --memory          Amount of memory in human-readable format (6G, 512Mi...) (4Gi)
-  -c, --cores           Number of cpu cores (2)
-  -n, --network         Type of network. one of host, nat, isolated, bridge (nat)
-  -a, --arch            Architecture. (x86_64)
-  -t, --no-graphics     Launch without graphics
-  -v, --verbose         Verbose
-  -h, --help            Show this message and exit
+commands:
+  run                   Run a given qemu image
+  install               Create from installation media
+
+global options:
+  -m, --memory            Amount of memory in human-readable format (6G, 512Mi...) (4Gi)
+  -c, --cores             Number of cpu cores (2)
+  -n, --network           Type of network. one of host, nat, isolated, bridge (nat)
+  -a, --arch              Architecture. (x86_64)
+  -t, --no-graphics       Launch without graphics
+  -d, --disks             Comma separated list of additional disks to attach
+  -i, --isos              Comma separated list of additional ISOs to attach
+  -b, --secure-boot       Enable secure boot (requires relevant fw)
+  -l, --tpm2              Enable TPM2.0 (requires swtpm)
+  -k, --disable-virtio    Don't use virtio for disk and network device
+  -o, --hv-enlightenments Enable hyper-v enlightenments (for windows guests)
+  -j, --monitor           Enable + connect to qemu monitor
+  -p, --snapshot          Run VM in snapshot mode
+  -e, --extra-flags       Additional flags to pass to qemu
+  -v, --verbose           Verbose
+  -h, --help              Show this message and exit
+
+install specific options:
+  -s, --size              Size of disk to create
 "
 }
 
-LONGOPTS=memory:,cores:,network:,no-graphics,verbose,help
-OPTIONS=m:c:n:tvh
+LONGOPTS=memory:,cores:,network:,size:,disks:,isos:,secure-boot,tpm2,disable-virtio,hv-enlightenments,monitor,snapshot,no-graphics,verbose,help
+OPTIONS=m:c:n:s:d:i:blkojptvh
 
 PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTS --name "$0" -- "$@") || exit 2
 eval set -- "$PARSED"
 
-MEM=4G CORES=2 NET=nat GRAPHIC=1 ARCH=x86_64 VERBOSE=0
+MEM=4G CORES=2 NET=nat SIZE=20G GRAPHIC=1 ARCH=x86_64 VERBOSE=0 SECURE_BOOT=0 TPM2=0 VIRTIO=1 MONITOR=0 SNAPSHOT=0 EXTRA_FLAGS="" HV_ENLIGHTENMENTS=0
 while true; do
   case $1 in
     -m|--memory)
-      MEM=numfmt --from=auto "$2" --to-unit 1048576
+      MEM=$(numfmt --from=auto "$2" --to-unit 1048576)
       shift 2
       ;;
     -c|--cores)
@@ -42,10 +57,63 @@ while true; do
       ;;
     -n|--network)
       echo host nat bridge isolated | grep -w -q $2 && NET=$2 || { echo "$e network mode $2 not recognized"; exit 2; }
+      [[ $NET == nat ]] && {
+        command -v dnsmasq || {
+          echo "$e dnsmasq is required for nat networking but is not installed!"
+          exit 1
+        }
+      }
+      shift 2
+      ;;
+    -s|--size)
+      SIZE=$2
       shift 2
       ;;
     -t|--no-graphics)
       GRAPHIC=0
+      shift
+      ;;
+    -b|--secure-boot)
+      SECURE_BOOT=1
+      UEFI_VAR_LOC=$XDG_RUNTIME_DIR/ovmf
+      [[ -r /usr/share/edk2/ovmf/OVMF_CODE_4M.secboot.fd ]] || {
+        echo "could not find ovmf firmware at /usr/share/edk2/ovmf/OVMF_CODE_4M.secboot.fd"
+        exit 1
+      }
+      [[ -r /usr/share/edk2/ovmf/OVMF_VARS_4M.secboot.fd ]] || {
+        echo "could not find ovmf variable file at /usr/share/edk2/ovmf/OVMF_VARS_4M.secboot.fd"
+        exit 1
+      }
+      shift
+      ;;
+    -l|--tpm2)
+      TPM2=1
+      # TODO: check for this env var
+      TPM_LOC=$XDG_STATE_HOME/tpm
+      command -v swtpm &>/dev/null || {
+        echo "$e swtpm is required for tpm emulation but is not installed!"
+        exit 1
+      }
+      shift
+      ;;
+    -k|--disable-virtio)
+      VIRTIO=0
+      shift
+      ;;
+    -o|--hv-enlightenments)
+      HV_ENLIGHTENMENTS=1
+      shift
+      ;;
+    -i|--monitor)
+      MONITOR=1
+      shift
+      ;;
+    -p|--snapshot)
+      SNAPSHOT=1
+      shift
+      ;;
+    -e|--extra-flags)
+      EXTRA_FLAGS=$1
       shift
       ;;
     -h|--help)
@@ -66,85 +134,34 @@ while true; do
   esac
 done
 
-if [[ $# -ne 1 ]]; then
+if [[ $# -ne 2 ]]; then
   show_help
   exit 2
 fi
 
 DIF=$(ip route | grep default | awk '{print $5}')
 
-ip -br -f bridge link | grep -w -q ^br0 || {
-  echo "$i creating bridge interface..."
-  sudo ip link add name br0 type bridge
-}
-[[ $NET != isolated ]] && {
-  echo "$i configuring ip addressing..."
-  sudo ip address add 172.20.0.1/16 dev br0 2>/dev/null || true
-  echo "$i setting up bridge firewall rules..."
-  sudo nft -f - << EOF
-table inet filter {
-  chain input {
-    counter jump qemu-input comment qemu
-  }
-  chain qemu-input {
-    udp dport 67 iifname br0 accept comment "virt bridge dhcp"
-    udp dport 53 ip saddr 172.20.0.0/16 accept comment "virt bridge dns"
-    tcp dport 53 ip saddr 172.20.0.0/16 accept comment "virt bridge dns"
-  }
-}
-EOF
-}
-grep -q "^allow br0$" /etc/qemu/bridge.conf || sudo echo "allow br0" >> /etc/qemu/bridge.conf
-
-#printf -v MACADDR "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff )) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff ))
-NETARG="bridge,helper=/usr/lib/qemu/qemu-bridge-helper,model=virtio-net-pci"
-case $NET in
-  nat)
-    sudo ip link set $DIF nomaster
-    sudo sysctl -w net.ipv4.ip_forward=1 > /dev/null && echo "$i enabled ipv4 forwarding"
-    echo "$i adding firewall rules for nat..."
-    sudo nft -f - << EOF
-table inet filter {
-  chain forward {
-    counter jump qemu-forward comment qemu
-  }
-  chain qemu-forward {
-    ct state established,related accept
-    iifname br0 oifname $DIF accept
-  }
-}
-table inet nat {
-  chain postrouting {
-    type nat hook postrouting priority srcnat
-    counter jump qemu-postrouting comment qemu
-  }
-  chain qemu-postrouting {
-    oifname $DIF ip saddr 172.20.0.0/16 masquerade
-  }
-}
-EOF
-  ;;
-  bridge)
-    echo "$i setting up bridged networking..."
-    sudo ip link set $DIF master br0
-  ;;
+INSTALL=0 RUN=0
+case $1 in
+  'install')
+    INSTALL=1
+    shift
+    ;;
+  'run')
+    RUN=1
+    shift
+    ;;
+  *)
+    echo "unknown command: $1"
+    exit 2
 esac
 
-echo "$i starting dnsmasq..."
-sudo dnsmasq -C /dev/null --interface=br0 --bind-interfaces --dhcp-range=172.20.0.2,172.20.255.254 &
-
-echo "$i launching $1..."
-CMD="qemu-system-$ARCH \
-  -m "$MEM" \
-  -smp "$CORES" \
-  -nic "$NETARG" \
-  -machine q35 \
-  -cpu host \
-  -accel kvm"
-[[ $GRAPHIC -eq 0 ]] && CMD="$CMD -nographic"
-CMD="$CMD $1"
-
-$CMD
+[[ $INSTALL -eq 1 ]] && {
+  img_basename="$(basename $1)"
+  DRIVE="${img_basename%%.*}.qcow2"
+  echo "$i creating qemu image..."
+  qemu-img create -f qcow $DRIVE $SIZE
+} || DRIVE="$1"
 
 del_jump() {
   local h
@@ -169,7 +186,114 @@ cleanup() {
   sudo nft delete chain inet nat qemu-postrouting 2>/dev/null
   sudo nft delete chain inet nat postrouting 2>/dev/null
   [[ $NET == bridge ]] && sudo ip link set "$DIF" nomaster
-  sudo kill $(cat /var/run/dnsmasq.pid)
+  [[ -f /var/run/dnsmasq.pid ]] && {
+    sudo kill $(cat /var/run/dnsmasq.pid)
+    sudo rm /var/run/dnsmasq.pid
+  }
 }
 
 trap cleanup EXIT
+
+config_networking() {
+  ip -br -f bridge link | grep -w -q ^br0 || {
+    echo "$i creating bridge interface..."
+    sudo ip link add name br0 type bridge
+  }
+  [[ $NET != isolated ]] && {
+    echo "$i configuring ip addressing..."
+    sudo ip address add 172.20.0.1/16 dev br0 2>/dev/null || true
+    echo "$i setting up bridge firewall rules..."
+    sudo nft -f - << EOF
+table inet filter {
+  chain input {
+    counter jump qemu-input comment qemu
+  }
+  chain qemu-input {
+    udp dport 67 iifname br0 accept comment "virt bridge dhcp"
+    udp dport 53 ip saddr 172.20.0.0/16 accept comment "virt bridge dns"
+    tcp dport 53 ip saddr 172.20.0.0/16 accept comment "virt bridge dns"
+  }
+}
+EOF
+  }
+  grep -q "^allow br0$" /etc/qemu/bridge.conf || sudo echo "allow br0" >> /etc/qemu/bridge.conf
+
+  #printf -v MACADDR "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff )) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff ))
+  NETARG="bridge,helper=/usr/lib/qemu/qemu-bridge-helper,model=virtio-net-pci"
+  case $NET in
+    nat)
+      sudo ip link set $DIF nomaster
+      sudo sysctl -w net.ipv4.ip_forward=1 > /dev/null && echo "$i enabled ipv4 forwarding"
+      echo "$i adding firewall rules for nat..."
+      sudo nft -f - << EOF
+table inet filter {
+  chain forward {
+    counter jump qemu-forward comment qemu
+  }
+  chain qemu-forward {
+    ct state established,related accept
+    iifname br0 oifname $DIF accept
+  }
+}
+table inet nat {
+  chain postrouting {
+    type nat hook postrouting priority srcnat
+    counter jump qemu-postrouting comment qemu
+  }
+  chain qemu-postrouting {
+    oifname $DIF ip saddr 172.20.0.0/16 masquerade
+  }
+}
+EOF
+    ;;
+    bridge)
+      echo "$i setting up bridged networking..."
+      sudo ip link set $DIF master br0
+    ;;
+  esac
+
+  echo "$i starting dnsmasq..."
+  sudo dnsmasq -C /dev/null --interface=br0 --bind-interfaces --dhcp-range=172.20.0.2,172.20.255.254 &
+}
+
+setup_tpm() {
+  echo "$i starting tpm socket..."
+  mkdir $TPM_LOC 2>/dev/null || true
+  swtpm socket --tpm2 --tpmstate dir=$TPM_LOC --ctrl type=unixio,path=$TPM_LOC/swtpm-sock &
+}
+
+setup_secboot() {
+  echo "$i setting up secure boot..."
+  mkdir $UEFI_VAR_LOC 2>/dev/null || true
+  cp /usr/share/edk2/ovmf/OVMF_VARS_4M.secboot.fd $UEFI_VAR_LOC
+}
+
+go() {
+  echo "$i launching $DRIVE..."
+  CMD="qemu-system-$ARCH \
+    -m $MEM \
+    -smp $CORES \
+    -nic $NETARG \
+    -machine q35 \
+    -accel kvm \
+    -drive file=$DRIVE,index=0,media=disk,if=virtio"
+  [[ $HV_ENLIGHTENMENTS -eq 1 ]] && CMD="$CMD -cpu host,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time" || CMD="$CMD -cpu host"
+  [[ $GRAPHIC -eq 0 ]] && CMD="$CMD -nographic"
+  [[ $SNAPSHOT -eq 1 ]] && CMD="$CMD -snapshot"
+  [[ $INSTALL -eq 1 ]] && CMD="$CMD -drive file=$DRIVE,index=2,media=cdrom"
+  [[ $TPM2 -eq 1 ]] && CMD="$CMD -chardev socket,id=chrtpm,path=$TPM_LOC/swtpm-sock \
+    -tpmdev emulator,id=tpm0,chardev=chrtpm \
+    -device tpm-tis,tpmdev=tpm0"
+  [[ $SECURE_BOOT -eq 1 ]] && CMD="$CMD -drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/ovmf/OVMF_CODE_4M.secboot.fd \
+    -drive if=pflash,format=raw,file=$UEFI_VAR_LOC/OVMF_VARS_4M.secboot.fd"
+  CMD="$CMD $EXTRA_FLAGS"
+  [[ $MONITOR -eq 1 ]] && CMD="$CMD -monitor unix:/tmp/qemu-monitor.sock,server,nowait &"
+
+  $CMD
+  [[ $MONITOR -eq 1 ]] && nc -U /tmp/qemu-monitor.sock
+}
+
+config_networking
+[[ $TPM2 -eq 1 ]] && setup_tpm
+[[ $SECURE_BOOT -eq 1 ]] && setup_secboot
+go
