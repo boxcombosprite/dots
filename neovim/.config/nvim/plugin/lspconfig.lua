@@ -59,6 +59,18 @@ local servers = {
   rust_analyzer = {},
   ansiblels = {},
   fsautocomplete = {},
+  ocamllsp = {},
+  --fsautocomplete = {
+  --  cmd = {
+  --    'fsautocomplete',
+  --    '--adaptive-lsp-server-enabled',
+  --    '--use-fcs-transparent-compiler',
+  --    '-l',
+  --    '/home/pasta/fsac.log',
+  --    '--log-level',
+  --    'Debug',
+  --  },
+  --},
 
   stylua = {},
   lua_ls = {

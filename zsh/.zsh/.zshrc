@@ -62,6 +62,8 @@ fkill() {
     fi
 }
 
+[[ ! -r '/home/pasta/.opam/opam-init/init.zsh' ]] || source '/home/pasta/.opam/opam-init/init.zsh' > /dev/null 2> /dev/null
+
 # plugins
 source $ZDOTDIR/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 source $ZDOTDIR/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
