@@ -3,15 +3,12 @@ fpath=(
     $fpath
 )
 
-export PATH="$PATH:/home/pasta/.dotnet/tools"
 # this doesnt work for some reason??
 #autoload -Uz promptinit
 #promptinit
 #prompt witch
 
 eval $(dircolors)
-
-export GPG_TTY=$(tty)
 
 # The following lines were added by compinstall
 
@@ -40,7 +37,6 @@ setopt notify
 bindkey -v
 # End of lines configured by zsh-newuser-install
 
-export VISUAL=vim
 autoload edit-command-line; zle -N edit-command-line
 bindkey -M vicmd v edit-command-line
 
@@ -63,6 +59,16 @@ fkill() {
 }
 
 [[ ! -r '/home/pasta/.opam/opam-init/init.zsh' ]] || source '/home/pasta/.opam/opam-init/init.zsh' > /dev/null 2> /dev/null
+
+if ! pgrep -u "$USER" ssh-agent > /dev/null; then
+    ssh-agent -t 1h > "$XDG_RUNTIME_DIR/ssh-agent.env"
+fi
+if [ ! -f "$SSH_AUTH_SOCK" ]; then
+    source "$XDG_RUNTIME_DIR/ssh-agent.env" >/dev/null
+fi
+
+export VISUAL=vim
+export GPG_TTY=$(tty)
 
 # plugins
 source $ZDOTDIR/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
