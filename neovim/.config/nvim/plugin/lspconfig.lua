@@ -53,53 +53,47 @@ vim.api.nvim_create_autocmd('LspAttach', {
 
 ---@type table<string, vim.lsp.Config>
 local servers = {
-  clangd = {},
+  --clangd = {},
   gopls = {},
   pyright = {},
   rust_analyzer = {},
   ansiblels = {},
-  fsautocomplete = {},
   ocamllsp = {},
-  --fsautocomplete = {
-  --  cmd = {
-  --    'fsautocomplete',
-  --    '--adaptive-lsp-server-enabled',
-  --    '--use-fcs-transparent-compiler',
-  --    '-l',
-  --    '/home/pasta/fsac.log',
-  --    '--log-level',
-  --    'Debug',
-  --  },
-  --},
-
-  stylua = {},
-  lua_ls = {
-    on_init = function(client)
-      if client.workspace_folders then
-        local path = client.workspace_folders[1].name
-        if path ~= vim.fn.stdpath 'config' and (vim.uv.fs_stat(path .. '/.luarc.json') or vim.uv.fs_stat(path .. '/.luarc.jsonc')) then return end
-      end
-
-      client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
-        runtime = {
-          version = 'LuaJIT',
-          path = { 'lua/?.lua', 'lua/?/init.lua' },
-        },
-        workspace = {
-          checkThirdParty = false,
-          -- NOTE: this is a lot slower and will cause issues when working on your own configuration.
-          --  See https://github.com/neovim/nvim-lspconfig/issues/3189
-          library = vim.tbl_extend('force', vim.api.nvim_get_runtime_file('', true), {
-            '${3rd}/luv/library',
-            '${3rd}/busted/library',
-          }),
-        },
-      })
-    end,
+  fsautocomplete = {
     settings = {
-      Lua = {},
+      FSharp = {
+        dotNetRoot = '/opt/dotnet-10.0',
+      },
     },
   },
+  stylua = {},
+  -- lua_ls = {
+  --   on_init = function(client)
+  --     if client.workspace_folders then
+  --       local path = client.workspace_folders[1].name
+  --       if path ~= vim.fn.stdpath 'config' and (vim.uv.fs_stat(path .. '/.luarc.json') or vim.uv.fs_stat(path .. '/.luarc.jsonc')) then return end
+  --     end
+
+  --     client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
+  --       runtime = {
+  --         version = 'LuaJIT',
+  --         path = { 'lua/?.lua', 'lua/?/init.lua' },
+  --       },
+  --       workspace = {
+  --         checkThirdParty = false,
+  --         -- NOTE: this is a lot slower and will cause issues when working on your own configuration.
+  --         --  See https://github.com/neovim/nvim-lspconfig/issues/3189
+  --         library = vim.tbl_extend('force', vim.api.nvim_get_runtime_file('', true), {
+  --           '${3rd}/luv/library',
+  --           '${3rd}/busted/library',
+  --         }),
+  --       },
+  --     })
+  --   end,
+  --   settings = {
+  --     Lua = {},
+  --   },
+  -- },
 }
 
 -- mason stuff
