@@ -24,7 +24,7 @@ zstyle ':completion:*' menu select=long
 zstyle ':completion:*' prompt '%e errors'
 zstyle ':completion:*' substitute 'NUMERIC == 2'
 zstyle ':completion:*' use-compctl false
-zstyle :compinstall filename '/home/pasta/.zshrc'
+zstyle :compinstall filename '/home/pasta/.zsh/.zshrc'
 
 autoload -Uz compinit
 compinit
