@@ -3,10 +3,20 @@ fpath=(
     $fpath
 )
 
-# this doesnt work for some reason??
-#autoload -Uz promptinit
-#promptinit
-#prompt witch
+() {
+    local funcs=$ZDOTDIR/func
+
+    typeset -TUg +x FPATH=$funcs:$FPATH fpath
+
+    if [[ -d $funcs ]]; then
+        autoload ${=$(cd "$funcs" && echo *)}
+    fi
+}
+
+
+autoload -Uz promptinit
+promptinit
+prompt witch
 
 eval $(dircolors)
 
@@ -44,19 +54,6 @@ alias ls='ls --color=auto'
 alias vim='nvim'
 alias vxxd='vim -b -c ":%!xxd" -c "set nomodified ft=xxd"'
 
-fkill() {
-    local pid
-    if [ "$UID" != "0" ]; then
-        pid=$(ps -f -u $UID | sed 1d | fzf -m | awk '{print $2}')
-    else
-        pid=$(ps -ef | sed 1d | fzf -m | awk '{print $2}')
-    fi
-
-    if [ "x$pid" != "x" ]
-    then
-        echo $pid | xargs kill -${1:-9}
-    fi
-}
 
 [[ ! -r '/home/pasta/.opam/opam-init/init.zsh' ]] || source '/home/pasta/.opam/opam-init/init.zsh' > /dev/null 2> /dev/null
 
