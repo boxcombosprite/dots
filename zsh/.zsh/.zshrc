@@ -71,6 +71,4 @@ export GPG_TTY=$(tty)
 source $ZDOTDIR/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 source $ZDOTDIR/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
-PROMPT="%B%F{yellow}%n%f%b %F{green}%~%f $ "
-
 # vim: ts=4 sts=4 sw=4 expandtab

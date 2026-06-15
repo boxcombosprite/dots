@@ -1,6 +1,6 @@
 prompt_witch_setup() {
     autoload -Uz colors && colors
-    PS1="lolol"
+    PS1="%B%F{yellow}%n%f%b %F{green}%~%f $ "
     #PS2=
     #RPS1=
     #RPS2=
@@ -11,3 +11,5 @@ prompt_witch_help() {
 help me
 EOF
 }
+
+prompt_witch_setup "$@"
