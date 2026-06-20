@@ -44,7 +44,7 @@ OPTIONS=m:c:n:s:d:i:e:blkojptvh
 PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTS --name "$0" -- "$@") || exit 2
 eval set -- "$PARSED"
 
-MEM=4G CORES=2 NET=nat SIZE=20G GRAPHIC=1 ARCH=x86_64 VERBOSE=0 SECURE_BOOT=0 TPM2=0 VIRTIO=1 MONITOR=0 SNAPSHOT=0 EXTRA_FLAGS="" HV_ENLIGHTENMENTS=0
+MEM=4G CORES=2 NET=nat SIZE=20G GRAPHIC=1 ARCH=x86_64 VERBOSE=0 SECURE_BOOT=0 TPM2=0 VIRTIO=1 MONITOR=0 SNAPSHOT=0 EXTRA_FLAGS="" HV_ENLIGHTENMENTS=0 CDROM=""
 while true; do
   case $1 in
     -m|--memory)
@@ -158,9 +158,10 @@ esac
 
 [[ $INSTALL -eq 1 ]] && {
   img_basename="$(basename $1)"
-  DRIVE="${img_basename%%.*}.qcow2"
+  CDROM="$img_basename"
+  DRIVE="${img_basename%.*}.qcow2"
   echo "$i creating qemu image..."
-  qemu-img create -f qcow $DRIVE $SIZE
+  qemu-img create -f qcow2 $DRIVE $SIZE
 } || DRIVE="$1"
 
 del_jump() {
@@ -276,11 +277,11 @@ go() {
     -nic $NETARG \
     -machine q35 \
     -accel kvm \
-    -drive file=$DRIVE,index=0,media=disk,if=virtio"
+    -drive file=$DRIVE,format=qcow2,index=0,media=disk,if=virtio"
   [[ $HV_ENLIGHTENMENTS -eq 1 ]] && CMD="$CMD -cpu host,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time" || CMD="$CMD -cpu host"
   [[ $GRAPHIC -eq 0 ]] && CMD="$CMD -nographic"
   [[ $SNAPSHOT -eq 1 ]] && CMD="$CMD -snapshot"
-  [[ $INSTALL -eq 1 ]] && CMD="$CMD -drive file=$DRIVE,index=2,media=cdrom"
+  [[ $INSTALL -eq 1 ]] && CMD="$CMD -drive file=$CDROM,index=2,media=cdrom"
   [[ $TPM2 -eq 1 ]] && CMD="$CMD -chardev socket,id=chrtpm,path=$TPM_LOC/swtpm-sock \
     -tpmdev emulator,id=tpm0,chardev=chrtpm \
     -device tpm-tis,tpmdev=tpm0"
