@@ -38,8 +38,8 @@ install specific options:
 "
 }
 
-LONGOPTS=memory:,cores:,network:,size:,disks:,isos:,secure-boot,tpm2,disable-virtio,hv-enlightenments,monitor,snapshot,no-graphics,verbose,help
-OPTIONS=m:c:n:s:d:i:blkojptvh
+LONGOPTS=memory:,cores:,network:,size:,disks:,isos:,extra-flags:,secure-boot,tpm2,disable-virtio,hv-enlightenments,monitor,snapshot,no-graphics,verbose,help
+OPTIONS=m:c:n:s:d:i:e:blkojptvh
 
 PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTS --name "$0" -- "$@") || exit 2
 eval set -- "$PARSED"
@@ -113,8 +113,8 @@ while true; do
       shift
       ;;
     -e|--extra-flags)
-      EXTRA_FLAGS=$1
-      shift
+      EXTRA_FLAGS="$2"
+      shift 2
       ;;
     -h|--help)
       show_help
