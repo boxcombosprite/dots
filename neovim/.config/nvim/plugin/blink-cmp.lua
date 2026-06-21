@@ -16,6 +16,14 @@ vim.api.nvim_create_autocmd('VimEnter', {
 
       completion = {
         documentation = { auto_show = false, auto_show_delay_ms = 500 },
+        trigger = {
+          show_on_keyword = false,
+          show_in_snippet = false,
+          show_on_trigger_character = false,
+          show_on_insert_on_trigger_character = false,
+          show_on_accept_on_trigger_character = false,
+          show_on_backspace_after_insert_enter = false,
+        },
       },
 
       sources = {
