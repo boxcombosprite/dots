@@ -1,7 +1,6 @@
 exec mako
 
-# alt key (winkey broke :/)
-set $mod Mod1
+set $mod Mod4
 set $left h
 set $down j
 set $up k
@@ -47,8 +46,7 @@ output DP-3 {
 }
 output HDMI-A-1 {
     mode 1920x1080@60Hz
-    #transform 270
-    bg ~/wallpapers/UQecBYwAcHg.jpg stretch
+    bg ~/wallpapers/'Bocchi the Rock - Kikuri acid trip wallpaper.png' fit
     pos 1920 0
 }
 
