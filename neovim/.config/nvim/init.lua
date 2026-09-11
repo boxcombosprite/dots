@@ -1,3 +1,5 @@
+vim.cmd.colorscheme 'lunaperche'
+
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
@@ -109,7 +111,5 @@ vim.api.nvim_create_autocmd('PackChanged', {
     if name == 'LuaSnip' and (kind == 'install' or kind == 'update') then vim.system({ 'make', 'install_jsregexp' }, { cwd = ev.data.path }) end
   end,
 })
-
-vim.cmd.colorscheme 'lunaperche'
 
 -- vim: ts=2 sts=2 sw=2 et
