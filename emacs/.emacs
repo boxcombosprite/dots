@@ -30,6 +30,7 @@
      ("https://u1f383.github.io/feed.xml" security-research)
      ("https://ctftime.org/writeups/rss/" sec)
      "https://www.netbsd.org/changes/rss-netbsd.xml"
+     "https://notnite.com/blog/rss.xml"
      "https://www.gentoo.org/feeds/news.xml"
      "https://archlinux.org/feeds/news/"
      "https://daniel.haxx.se/blog/feed/"
@@ -74,6 +75,7 @@
      ("https://www.youtube.com/feeds/videos.xml?channel_id=UCa6eh7gCkpPo5XXUDfygQQA" youtube)
      ("https://www.youtube.com/feeds/videos.xml?channel_id=UC9-y-6csu5WGm29I7JiwpnA" youtube)
      ("https://www.youtube.com/feeds/videos.xml?channel_id=UCBa659QWEk1AI4Tg--mrJ2A" youtube)
+     ("https://www.youtube.com/feeds/videos.xml?channel_id=UC3azLjQuz9s5qk76KEXaTvA" youtube)
      ("https://www.hackthebox.com/rss/blog/blue-teaming" sec)
      ("https://www.hackthebox.com/rss/blog/htb-research-labs" sec)
      ("https://www.hackthebox.com/rss/blog/news" sec)
