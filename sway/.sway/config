@@ -42,11 +42,12 @@ gaps inner 3
 ### output
 output DP-3 {
     mode 1920x1080@144.001Hz
+    bg ~/wallpapers/'Bocchi the Rock - Kikuri acid trip wallpaper.png' fit
     pos 0 840
 }
 output HDMI-A-1 {
     mode 1920x1080@60Hz
-    bg ~/wallpapers/'Bocchi the Rock - Kikuri acid trip wallpaper.png' fit
+    transform 270
     pos 1920 0
 }
 
