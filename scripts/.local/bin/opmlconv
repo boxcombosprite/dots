@@ -1,0 +1,110 @@
+#!/usr/bin/env ruby
+
+require 'rss'
+require 'open-uri'
+require 'date'
+require 'nokogiri'
+
+def valid_url?(url)
+  uri = URI.parse(url)
+  uri.is_a?(URI::HTTP) && !uri.host.empty?
+rescue URI::InvalidURIError
+  false
+end
+
+def get_feed(url)
+  url = URI.parse(url)
+  URI.open(url) do |f|
+    if f.content_type.match? '^(?:application/xml|text/xml|application/rss\+xml|application/atom\+xml)$'
+      [url, RSS::Parser.parse(f)]
+    elsif f.content_type == 'text/html'
+      doc = Nokogiri::HTML(f)
+      atom = rss = nil
+      doc.xpath('/html/head/link').filter('[rel=alternate]').each do |l|
+        if l.attr('type') == 'application/atom+xml'
+          atom = url.merge(l.attr('href'))
+          break
+        elsif l.attr('type') == 'application/rss+xml'
+          rss = url.merge(l.attr('href'))
+        end
+      end
+      if !(atom || rss)
+        nil
+      else
+        url = atom ? atom : rss
+        [url, RSS::Parser.parse(url)]
+      end
+    end
+  end
+end
+
+outlines = []
+ARGF.each do |line|
+  url = line.strip
+  if !valid_url?(url)
+    raise RuntimeError, "bad url: #{url}"
+  end
+  begin
+    furl, feed = get_feed(url)
+  rescue RSS::Error => e
+    STDERR.puts "ERROR: feed @ #{url} didn't look like RSS: #{e.message}"
+  rescue OpenURI::HTTPError => e
+    STDERR.puts "ERROR: page @ #{url} could not be retrieved: #{e.message}"
+  rescue Net::OpenTimeout => e
+    STDERR.puts "ERROR: timeout while connecting to #{url}: #{e.message}"
+  rescue Socket::ResolutionError => e
+    STDERR.puts "ERROR: #{url} didn't resolve: #{e.message}"
+  rescue OpenSSL::SSL::SSLError => e
+    STDERR.puts "ERROR: tls error @ #{url}: #{e.message}"
+  rescue Errno::ECONNREFUSED => e
+    STDERR.puts "ERROR: connection refused @ #{url}: #{e.message}"
+  rescue RuntimeError => e
+    STDERR.puts "ERROR: runtime error on #{url}: #{e.message}"
+  else
+    if !feed
+      STDERR.puts "ERROR: couldn't find feed at #{url}"
+      next
+    end
+    case feed
+    when RSS::Rss
+      outlines <<
+      {
+        :text => feed.channel.title,
+        :title => feed.channel.title,
+        :type => 'rss',
+        :version => 'RSS',
+        :description => feed.channel.description,
+        :htmlUrl => feed.channel.link,
+        :xmlUrl => furl
+      }
+    when RSS::Atom::Feed
+      outlines <<
+      {
+        :text => feed.title.content,
+        :title => feed.title.content,
+        :type => 'rss',
+        :version => 'RSS',
+        :description => feed.subtitle ? feed.subtitle.content : '',
+        :htmlUrl => feed.link ? feed.link.href : '',
+        :xmlUrl => furl
+      }
+    else
+      STDERR.puts "ERROR: unknown feed type at #{furl}, not atom or rss"
+    end
+  end
+end
+
+b = Nokogiri::XML::Builder.new(:encoding => 'UTF-8') do
+  opml {
+    head {
+      title "feeds_#{Date.today.to_s}"
+    }
+    body {
+      outlines.each do |o|
+        outline(**o)
+      end
+    }
+  }
+end
+
+puts b.to_xml
