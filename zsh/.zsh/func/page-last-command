@@ -1,0 +1,5 @@
+function page-last-command {
+  [[ -n $PAGER || -n $EDITOR ]] || return 1
+  eval "$(fc -ln -1)" | ${(z)PAGER:-$EDITOR}
+}
+
