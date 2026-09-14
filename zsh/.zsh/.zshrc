@@ -13,9 +13,22 @@ fpath=(
     fi
 }
 
+unsetopt globcomplete
+unsetopt menucomplete
 setopt promptsubst
+setopt multios
 setopt interactivecomments
 setopt numericglobsort
+setopt localoptions
+setopt localtraps
+setopt sharehistory
+setopt extendedhistory
+setopt appendhistory
+setopt incappendhistory
+setopt histignorealldups
+setopt completeinword
+setopt alwaystoend
+setopt automenu
 
 autoload -Uz promptinit
 promptinit
