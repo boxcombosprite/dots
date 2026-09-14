@@ -100,6 +100,11 @@ zle-line-init () {
 zle -N zle-keymap-select
 zle -N zle-line-init
 
+typeset -A ZSH_HIGHLIGHT_STYLES
+ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern)
+ZSH_HIGHLIGHT_STYLES[comment]='fg=grey,dim'
+ZSH_HIGHLIGHT_STYLES[builtin]='fg=cyan'
+
 [[ ! -r '/home/pasta/.opam/opam-init/init.zsh' ]] || source '/home/pasta/.opam/opam-init/init.zsh' > /dev/null 2> /dev/null
 
 # plugins
