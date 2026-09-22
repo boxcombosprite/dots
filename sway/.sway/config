@@ -167,6 +167,8 @@ mode "resize" {
 }
 bindsym $mod+r mode "resize"
 
+for_window [class="Godot"] floating enable
+
 bar {
     position top
     font pango: $font_name 11

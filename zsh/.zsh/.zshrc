@@ -70,12 +70,14 @@ autoload -U edit-command-line; zle -N edit-command-line
 autoload -Uz tetriscurses
 zle -N prepend-sudo
 zle -N page-last-command
+zle -N fh
 
 bindkey -M vicmd v edit-command-line
 bindkey -M viins '^[.' insert-last-word
 bindkey -M viins '^y' autosuggest-accept
 bindkey -M vicmd s prepend-sudo
 bindkey -M vicmd '^x^p' page-last-command
+bindkey -M vicmd '^r' fh
 
 
 alias ls='ls --color=auto'
