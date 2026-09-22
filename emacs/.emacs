@@ -47,9 +47,11 @@
      ("https://blog.jsbarretto.com/rss.xml" programming)
      "https://www.eamoncaddigan.net/posts/index.xml"
      "https://aniket.foo/index.xml"
+     "http://lambda-the-ultimate.org/rss.xml"
      "https://dustri.org/b/rss.xml"
      "https://attackanddefense.dev/feed.xml"
      "https://blog.archive.org/feed/"
+     "http://blog.netbsd.org/tnf/feed/entries/atom"
      "https://reddit.com/r/librarians/.rss"
      "https://reddit.com/r/archivists/.rss"
      "https://reddit.com/r/EmuDev/.rss"
