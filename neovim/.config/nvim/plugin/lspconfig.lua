@@ -55,11 +55,18 @@ vim.api.nvim_create_autocmd('LspAttach', {
 local servers = {
   clangd = {},
   gopls = {},
+  -- basedpyright = {},
   pyright = {},
   rust_analyzer = {},
   ansiblels = {},
   fsautocomplete = {},
   ocamllsp = {},
+  ocamlformat = {},
+  solargraph = {},
+  -- ruby_lsp = {
+  --   cmd_env = { GEM_HOME = vim.fn.expand '~/.local/share/gem/ruby/3.4.0' },
+  -- },
+  rubocop = {},
   --fsautocomplete = {
   --  cmd = {
   --    'fsautocomplete',
