@@ -1,0 +1,4 @@
+function prepend-doas {
+  [[ $BUFFER != "doas "* ]] && BUFFER="doas $BUFFER"; CURSOR+=5
+}
+
