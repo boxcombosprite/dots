@@ -15,7 +15,7 @@ set $menu wmenu-run -i -f "Hasklug Nerd Font 10" -p "run:" -b -N 285577e0 -M 285
 set $system_color_scheme 'prefer-dark'
 #set $system_dpi_scaling_factor 2.6
 set $cursor_size 24
-set $cursor_theme 'Adwaita'
+set $cursor_theme 'Silver'
 set $font_name 'Hasklug Nerd Font'
 set $font_size 10
 

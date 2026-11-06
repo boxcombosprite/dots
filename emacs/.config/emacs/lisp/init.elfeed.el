@@ -1,18 +1,5 @@
 ;;; ... -*- lexical-binding: t -*-
 
-(setq custom-file "~/.emacs.d/.custom.el")
-(load custom-file)
-
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-(package-initialize)
-
-(tool-bar-mode 0)
-(menu-bar-mode 0)
-(scroll-bar-mode 0)
-(column-number-mode 1)
-(show-paren-mode 1)
-
 (keymap-global-set "C-x w" #'elfeed)
 
 (with-eval-after-load 'elfeed-search
@@ -21,9 +8,8 @@
 
     (define-key elfeed-search-mode-map (kbd "*") #'my/elfeed-toggle-star)))
 
-
 (setq elfeed-feeds
-   '(("https://news.ycombinator.com/rss" social)
+   '(("https://www.pouet.net/export/lastprodsreleased.rss.php" scene)
      ("https://lobste.rs/rss" social)
      ("https://lwn.net/headlines/rss" linux)
      ("https://jobs.code4lib.org/jobs.atom" jobs)
@@ -135,7 +121,7 @@
      ("https://www.jackson-t.ca/" sec)
      ("https://www.n4r1b.com/posts/" sec)
      ("https://jhalon.github.io/posts.html" sec)
-     ("https://www.rack911labs.com/research" 	 sec)
+     ("https://www.rack911labs.com/research" 	sec)
      ("https://nullsecurity.net/" sec)
      ("https://0xpat.github.io/" sec)
      ("https://h0mbre.github.io/" sec)
@@ -1014,4 +1000,3 @@
      ("https://www.sygnia.co/feed/" sec)
      ("https://www.whitecyberduck.com/rss.xml" sec)
      ("https://www.wiz.io/feed/rss.xml" sec)))
-
