@@ -14,6 +14,12 @@
 (show-paren-mode 1)
 (global-display-line-numbers-mode 1)
 
+(setq display-line-numbers-type 'relative)
+
 (keymap-global-set "C-h" #'delete-backward-char)
 
 (load "init.elfeed")
+(load "init.tuareg")
+(load "init.eglot")
+(load "init.company")
+

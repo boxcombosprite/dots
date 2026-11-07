@@ -6,6 +6,6 @@ export XDG_CONFIG_HOME="$HOME/.config"
 
 export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.sock"
 
-export EDITOR=/usr/bin/nvim
+export EDITOR=/usr/bin/emacs
 export PAGER=/usr/bin/less
 

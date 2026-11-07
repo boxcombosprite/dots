@@ -66,22 +66,22 @@ HISTFILE=~/.zsh_history
 HISTSIZE=1000
 SAVEHIST=1000
 setopt notify
-bindkey -v
+bindkey -e
 # End of lines configured by zsh-newuser-install
 
-export VISUAL=vim
+export VISUAL=emacs
 autoload -U edit-command-line; zle -N edit-command-line
 autoload -Uz tetriscurses
 zle -N prepend-doas
 zle -N page-last-command
 zle -N fh
 
-bindkey -M vicmd v edit-command-line
-bindkey -M viins '^[.' insert-last-word
-bindkey -M viins '^y' autosuggest-accept
-bindkey -M vicmd s prepend-doas
-bindkey -M vicmd '^x^p' page-last-command
-bindkey -M vicmd '^r' fh
+# bindkey -M vicmd v edit-command-line
+# bindkey -M viins '^[.' insert-last-word
+bindkey -M main '^y' autosuggest-accept
+# bindkey -M vicmd s prepend-doas
+# bindkey -M vicmd '^x^p' page-last-command
+# bindkey -M vicmd '^r' fh
 
 
 alias ls='ls --color=auto'
@@ -91,20 +91,20 @@ alias vide='vim -c ":10 sp | term" -c ":Neotree" -c ":wincmd h"'
 alias td='cd $(mktemp -d)'
 alias xo='xdg-open'
 
-zle-keymap-select () {
-    case $KEYMAP in
-        vicmd) printf "\033[2 q";;
-        viins|main) printf "\033[5 q";;
-    esac
-}
-
-zle-line-init () {
-    zle -K viins
-    printf "\033[5 q"
-}
-
-zle -N zle-keymap-select
-zle -N zle-line-init
+# zle-keymap-select () {
+#     case $KEYMAP in
+#         vicmd) printf "\033[2 q";;
+#         viins|main) printf "\033[5 q";;
+#     esac
+# }
+#
+# zle-line-init () {
+#     zle -K viins
+#     printf "\033[5 q"
+# }
+#
+# zle -N zle-keymap-select
+# zle -N zle-line-init
 
 typeset -A ZSH_HIGHLIGHT_STYLES
 ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern)
